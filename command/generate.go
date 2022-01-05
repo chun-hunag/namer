@@ -36,7 +36,7 @@ func generate(c *cli.Context) error {
 	generator.Resource = res
 
 	for i := 0; i < num; i++ {
-		fmt.Println(generator.Name())
+		fmt.Println(generator.NameSingle())
 	}
 
 	return nil
