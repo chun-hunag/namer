@@ -1,9 +1,11 @@
 package command
 
 import (
+	"example/name-generator/facade"
 	"example/name-generator/provider"
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli"
+	"strconv"
 )
 
 var (
@@ -17,21 +19,32 @@ var (
 )
 
 func serve(c *cli.Context) error {
-	resource, _ := provider.ParseFile("names.yml")
-	num := 10
-
 	server := gin.Default()
-	server.GET(`/generate`, func(c *gin.Context) {
-		generator := provider.Create()
-		generator.Resource = resource
+	server.GET(`/generate`, func(g *gin.Context) {
+		num, err := strconv.Atoi(g.DefaultQuery("amount", "0"))
 
-		str := []string{}
-		for i := 0; i < num; i++ {
-			str = append(str, generator.Name())
+		if err != nil {
+			g.JSON(400, err)
+			return
 		}
 
+		firstNameNum, err := strconv.Atoi(g.DefaultQuery("firstNameNum", "0"))
+
+		if err != nil {
+			g.JSON(400, err)
+			return
+		}
+
+		facade.GenerateFirstNameNum = firstNameNum
+		facade.GenerateGender = g.DefaultQuery("gender", "")
+
+		str := make([]string, num)
+		facade.Generate(c.GlobalString("provider"), num, func(item string, index int) {
+			str[index] = item
+		})
+
 		provider.Create()
-		c.JSON(200, str)
+		g.JSON(200, str)
 	})
 
 	server.Run()

@@ -1,7 +1,7 @@
 package command
 
 import (
-	"example/name-generator/provider"
+	"example/name-generator/facade"
 	"fmt"
 	"github.com/urfave/cli"
 )
@@ -11,24 +11,11 @@ var (
 		Name:  "query",
 		Usage: "查詢字典",
 		Action: func(c *cli.Context) error {
-			return query(c)
+			str := c.Args().First()
+
+			return facade.Query(str, func(item string) {
+				fmt.Println(item)
+			})
 		},
 	}
 )
-
-func query(c *cli.Context) error {
-	str := c.Args().First()
-
-	dict, err := provider.Query(str)
-
-	if (err != nil) {
-		return err;
-	}
-
-	for _, heteronym := range dict.Heteronyms {
-		for _, definition := range heteronym.Definitions {
-			fmt.Println(definition)
-		}
-	}
-	return nil
-}
